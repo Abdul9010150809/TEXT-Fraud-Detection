@@ -108,6 +108,9 @@ class TextAnalyzeResponse(BaseModel):
     detected_signals: Dict[str, bool]
     link_intelligence: Optional[LinkIntelligence]
     text_error_analysis: Optional[TextErrorAnalysis] = None
+    author_prediction: str = Field("Unknown", description="Predicts if text is 'AI Generated' or 'Human Typed'")
+    api_signals: Optional[List[Dict[str, Any]]] = Field(None, description="Individual API verdict signals")
+    api_report: Optional[Dict[str, Any]] = Field(None, description="Raw multi-API combined report")
     recommended_action: List[str]
     confidence: float
     processing_time: float
@@ -160,27 +163,62 @@ async def analyze_text(
 ) -> TextAnalyzeResponse:
     """
     Analyze a text message for fraud classification (V2).
+    Runs multi-API analysis via the orchestrator when available.
     """
     
     try:
         # Sanitize input
         text = sanitize_text(payload.text)
+        start_time = time.time()
         
         # Import classifier
         from backend.ai_modules.text_classifier import TextClassifier
         
-        # Initialize and classify
-        # V2: No arguments needed for init
+        # Initialize and classify (heuristic baseline)
         classifier = TextClassifier()
         result = classifier.classify(text)
-        
-        # Build response using to_json() (which returns dict)
         response_data = result.to_json()
-        response_data["timestamp"] = datetime.utcnow().isoformat()
-        response_data["processing_time"] = result.processing_time
         
-        # Log analysis for dataset expansion
-        log_analysis(payload.dict(), response_data)
+        # --- Run external API orchestrator in parallel (non-blocking) ---
+        api_report = None
+        api_signals = None
+        try:
+            from backend.integrations.api_orchestrator import run_full_analysis
+            api_report = await run_full_analysis(text)
+            api_signals = api_report.get("api_signals", [])
+            
+            # Blend the combined API risk score with the heuristic score
+            api_score = api_report.get("combined_risk_score", 0)
+            if api_score > 0:
+                # Weighted blend: 40% heuristic, 60% real APIs
+                blended = int(response_data["risk_score"] * 0.4 + api_score * 0.6)
+                response_data["risk_score"] = blended
+                
+                # Update risk level from blended score
+                if blended >= 80:
+                    response_data["risk_level"] = "Critical"
+                    response_data["is_fraud"] = True
+                elif blended >= 60:
+                    response_data["risk_level"] = "High"
+                    response_data["is_fraud"] = True
+                elif blended >= 35:
+                    response_data["risk_level"] = "Suspicious"
+                else:
+                    response_data["risk_level"] = "Safe"
+                    response_data["is_fraud"] = False
+                    
+        except ImportError:
+            logger.info("API orchestrator not available, using heuristic only")
+        except Exception as api_err:
+            logger.warning(f"API orchestrator error (continuing without): {api_err}")
+        
+        response_data["timestamp"] = datetime.utcnow().isoformat()
+        response_data["processing_time"] = time.time() - start_time
+        response_data["api_signals"] = api_signals
+        response_data["api_report"] = api_report
+        
+        # Log analysis
+        log_analysis(payload.model_dump(), response_data)
         
         logger.info(
             f"Analyzed text: is_fraud={response_data['is_fraud']}, "

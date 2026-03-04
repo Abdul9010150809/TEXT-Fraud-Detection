@@ -71,6 +71,8 @@ export interface AnalysisResponse {
     explanation: string;
     signals: string[];
     tone: "Normal" | "Urgent" | "Manipulative" | "AI-Like";
+    author_prediction: "AI Generated" | "Human Typed" | "Unknown";
+    api_signals?: Array<{ api: string; icon: string; verdict: string; score: number; flagged: boolean; detail: string }>;
 }
 
 export async function analyzeContent(text: string, useMock: boolean = false): Promise<AnalysisResponse> {
@@ -163,7 +165,8 @@ export async function analyzeContent(text: string, useMock: boolean = false): Pr
         "confidence": number,
         "explanation": "Summary",
         "signals": ["List"],
-        "tone": "Normal" | "Urgent" | "Manipulative"
+        "tone": "Normal" | "Urgent" | "Manipulative",
+        "author_prediction": "AI Generated" | "Human Typed" | "Unknown"
       }
     `;
 
@@ -358,6 +361,7 @@ function getMockAnalysis(text: string): AnalysisResponse {
             detected_signals: detectedSignals,
             link_analysis: { domain: urls ? urls[0].replace(/https?:\/\//, '').split('/')[0] : "mock.com", shortened: /bit\.ly|tinyurl/i.test(text), brand_spoofing: detectedSignals.impersonation, google_presence: "Medium" },
             similar_case_match: { id: demoMatch.id, similarity_score: 95, description: demoMatch.explanation },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             text_error_analysis: (demoMatch as any).textErrorAnalysis || { typos: [], grammar_issues: [], score: 85 },
             bank_verification: bankVerification,
             counterfactual_safe_conditions: ["If sender used official domain", "If no urgency language was used"],
@@ -367,7 +371,8 @@ function getMockAnalysis(text: string): AnalysisResponse {
             confidence: 90,
             explanation: demoMatch.explanation,
             signals: signals.length > 0 ? signals : ["Demo Match"],
-            tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal"
+            tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal",
+            author_prediction: detectedSignals.ai_generated_tone ? "AI Generated" : "Unknown"
         };
     }
 
@@ -432,6 +437,7 @@ function getMockAnalysis(text: string): AnalysisResponse {
         confidence: riskScore > 60 ? 85 : riskScore > 30 ? 70 : 60,
         explanation: explanation,
         signals: signals.length > 0 ? signals : ["Content Analysis Complete"],
-        tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal"
+        tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal",
+        author_prediction: detectedSignals.ai_generated_tone ? "AI Generated" : "Unknown"
     };
 }

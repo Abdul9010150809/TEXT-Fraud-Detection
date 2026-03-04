@@ -16,23 +16,29 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Load .env keys into environment
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path="backend/.env", override=False)
+
     # Startup
     logger.info("Starting up the application...")
     try:
-        # Always skip DB connection for local testing without docker
-        # await mongodb_conn.connect()
-        # await redis_conn.connect()
         logger.info("Database connections skipped for text pivot testing")
     except Exception as e:
         logger.error(f"Failed to establish database connections: {e}")
         raise
 
+    # Start Telegram bot if configured
+    try:
+        from backend.integrations.telegram_bot import start_bot
+        await start_bot()
+    except Exception as e:
+        logger.warning(f"Telegram bot could not start: {e}")
+
     yield
 
     # Shutdown
     logger.info("Shutting down the application...")
-    # await redis_conn.close()
-    # await mongodb_conn.close()
     logger.info("Application closed")
 
 app = FastAPI(

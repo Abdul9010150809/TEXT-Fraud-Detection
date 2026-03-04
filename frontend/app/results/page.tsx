@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useFraudStore } from '@/store/useFraudStore';
 import { RiskMeter } from '@/components/results/RiskMeter';
 import { TextHighlighter } from '@/components/results/TextHighlighter';
-import { ArrowLeft, Loader2, Check, AlertOctagon, Info, Sparkles, Scan, Eye, Database, FileText, AlignLeft, ShieldCheck, XCircle, SpellCheck, Mail, Paperclip, AlertTriangle, Smartphone, Search } from 'lucide-react';
+import { ArrowLeft, Loader2, Check, AlertOctagon, Info, Sparkles, Scan, Eye, Database, FileText, AlignLeft, ShieldCheck, XCircle, SpellCheck, Mail, Paperclip, AlertTriangle, Smartphone, Search, Bot, User } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -118,6 +118,15 @@ export default function ResultsPage() {
                                 }`}>
                                 Tone: {result.tone}
                             </span>
+                            {result.author_prediction && (
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border flex items-center gap-1 ${result.author_prediction === 'AI Generated' ? 'bg-purple-100 text-purple-700 border-purple-200' :
+                                    result.author_prediction === 'Human Typed' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' :
+                                        'bg-slate-100 text-slate-700 border-slate-200'
+                                    }`}>
+                                    {result.author_prediction === 'AI Generated' ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                                    {result.author_prediction}
+                                </span>
+                            )}
                             {result.fraud_type.map((ft, i) => (
                                 <span key={i} className="px-3 py-1 rounded-full bg-muted text-xs font-bold uppercase">{ft}</span>
                             ))}
@@ -335,6 +344,34 @@ export default function ResultsPage() {
                             })}
                         </div>
                     </motion.div>
+
+                    {/* ===== API Intelligence Panel ===== */}
+                    {result.api_signals && result.api_signals.length > 0 && (
+                        <motion.div variants={item} className="bg-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-700">
+                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-yellow-400" />
+                                Real-World API Intelligence
+                                <span className="ml-auto text-xs bg-yellow-400 text-slate-900 px-2 py-0.5 rounded-full font-bold">LIVE APIs</span>
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {result.api_signals.map((sig: { api: string; icon: string; verdict: string; score: number; flagged: boolean; detail: string }, i: number) => (
+                                    <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${sig.flagged ? 'bg-red-900/20 border-red-700/40' : 'bg-green-900/20 border-green-700/40'}`}>
+                                        <span className="text-xl">{sig.icon}</span>
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="text-xs font-bold text-slate-300">{sig.api}</span>
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${sig.flagged ? 'bg-red-500 text-white' : 'bg-green-600 text-white'}`}>
+                                                    {sig.verdict}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-slate-400 mt-0.5 truncate">{sig.detail}</p>
+                                        </div>
+                                        <span className={`ml-auto text-xs font-bold shrink-0 ${sig.flagged ? 'text-red-400' : 'text-green-400'}`}>{sig.score}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
 
                 </div>
             </div>
