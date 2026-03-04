@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 
 from backend.models import schemas
 from backend.integrations.fusion_wrapper import run_fusion
-from ai_modules.text_classifier import TextClassifier, RiskLevel
+from backend.ai_modules.text_classifier import TextClassifier, RiskLevel
 
 logger = logging.getLogger(__name__)
 

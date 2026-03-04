@@ -48,6 +48,45 @@ export const DEMO_DATASET = [
         fraudType: 'Prize Scam',
         explanation: "Classic 'free prize' scam. Claims you replied to get free items. Urgency (delivery tomorrow) and premium rate number call."
     },
+    {
+        id: 'real-7',
+        label: 'Real: Urgent Account Block (With Typos)',
+        text: "URGENT!! Your acount balances is on hold due to unauthorize loggin atempt. Please verify imediatly to restor access: http://secure-update-acount.com/login",
+        riskLevel: 'CRITICAL',
+        fraudType: 'Phishing',
+        explanation: "Poor grammar and severe spelling mistakes ('acount', 'unauthorize', 'loggin', 'atempt', 'imediatly', 'restor') combined with urgency to steal credentials via a spoofed link.",
+        textErrorAnalysis: {
+            typos: ["acount", "unauthorize", "loggin", "atempt", "imediatly", "restor"],
+            grammar_issues: ["balances is", "due to unauthorize loggin"],
+            score: 45
+        }
+    },
+    {
+        id: 'real-8',
+        label: 'Real: Crypto Investment Guaranteed Returns',
+        text: "Make $5,000 weekly from home! Best Bitcoin cloud mining ROI 100% guaranteed in 24 hours. No risk. Send BTC to our secure wallet now: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+        riskLevel: 'HIGH',
+        fraudType: 'Investment Scam',
+        explanation: "Classic high-yield investment program (HYIP) scam. Promises unrealistic guaranteed returns on crypto with zero risk.",
+        textErrorAnalysis: {
+            typos: [],
+            grammar_issues: [],
+            score: 85
+        }
+    },
+    {
+        id: 'real-9',
+        label: 'Real: Sextortion/Blackmail Threat',
+        text: "I installed malware on your device and recorded you through your webcam. If you don't send $1000 in Bitcoin to my account within 48 hours, I will leak the footage to all your contacts. Act now.",
+        riskLevel: 'CRITICAL',
+        fraudType: 'Extortion',
+        explanation: "A standard sextortion email template attempting fear and blackmail using fake claims of compromised hardware.",
+        textErrorAnalysis: {
+            typos: [],
+            grammar_issues: [],
+            score: 90
+        }
+    },
 
     // Safe examples from real dataset
     {

@@ -1,0 +1,40 @@
+
+> frontend@0.1.0 build
+> next build
+
+ΓÜá `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+ΓÜá Invalid next.config.ts options detected: 
+ΓÜá     Unrecognized key(s) in object: 'eslint'
+ΓÜá See more info here: https://nextjs.org/docs/messages/invalid-next-config
+ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\Lenovo\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\package-lock.json
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Experiments (use with caution):
+  ┬╖ optimizePackageImports
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 5.7s
+  Running TypeScript ...
+Failed to compile.
+
+./next.config.ts:19:3
+Type error: Object literal may only specify known properties, and 'eslint' does not exist in type 'NextConfig'.
+
+  17 |   },
+  18 |   // ESLint configuration
+> 19 |   eslint: {
+     |   ^
+  20 |     ignoreDuringBuilds: false,
+  21 |   },
+  22 |   // Transpile packages
+Next.js build worker exited with code: 1 and signal: null

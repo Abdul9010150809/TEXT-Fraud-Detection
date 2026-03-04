@@ -37,7 +37,7 @@ export default function ComparePage() {
                     </div>
 
                     <div className="p-4 bg-muted/40 rounded-xl border border-border font-mono text-sm leading-relaxed">
-                        "Dear Customer, Rs 5,000 debited from acc **9012 on 29-01-26. Info: ATM WDL. If not done by you, call 1800-123-4567 - SBI"
+                        &quot;Dear Customer, Rs 5,000 debited from acc **9012 on 29-01-26. Info: ATM WDL. If not done by you, call 1800-123-4567 - SBI&quot;
                     </div>
 
                     <div className="flex-1 border-t border-border pt-6">
@@ -53,7 +53,7 @@ export default function ComparePage() {
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-safe">✔</span>
-                                Factual tone, no "immediate panic" induction.
+                                Factual tone, no &quot;immediate panic&quot; induction.
                             </li>
                         </ul>
                     </div>
@@ -75,7 +75,7 @@ export default function ComparePage() {
                     </div>
 
                     <div className="p-4 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30 font-mono text-sm leading-relaxed text-red-900 dark:text-red-100">
-                        "Urgent: Your SBI acc will be BLOCKED today due to KYC issue. Click immediately to update: http://sbi-secure-update.xyz"
+                        &quot;Urgent: Your SBI acc will be BLOCKED today due to KYC issue. Click immediately to update: http://sbi-secure-update.xyz&quot;
                     </div>
 
                     <div className="flex-1 border-t border-border pt-6">
@@ -83,11 +83,11 @@ export default function ComparePage() {
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li className="flex items-start gap-2">
                                 <span className="text-danger">✖</span>
-                                <b>Urgency Trap:</b> "BLOCKED today", "immediately".
+                                <b>Urgency Trap:</b> &quot;BLOCKED today&quot;, &quot;immediately&quot;.
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-danger">✖</span>
-                                <b>Suspicious Link:</b> "sbi-secure-update.xyz" (Unofficial TLD).
+                                <b>Suspicious Link:</b> &quot;sbi-secure-update.xyz&quot; (Unofficial TLD).
                             </li>
                             <li className="flex items-start gap-2">
                                 <span className="text-danger">✖</span>

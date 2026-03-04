@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle, ArrowDown, Brain, Link as LinkIcon, ShieldAlert, FileText, Search } from 'lucide-react';
+import { CheckCircle, Brain, Link as LinkIcon, ShieldAlert, FileText, Search } from 'lucide-react';
 import { useFraudStore } from '@/store/useFraudStore';
 import Link from 'next/link';
 
@@ -53,7 +53,7 @@ export default function TimelinePage() {
         <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-500">
             <div className="text-center mb-8">
                 <h1 className="text-3xl font-bold font-display">Detection Timeline</h1>
-                <p className="text-muted-foreground">Trace the AI's decision-making process step-by-step.</p>
+                <p className="text-muted-foreground">Trace the AI&apos;s decision-making process step-by-step.</p>
             </div>
 
             <div className="relative">

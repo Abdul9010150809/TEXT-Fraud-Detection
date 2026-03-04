@@ -1,18 +1,15 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useFraudStore } from '@/store/useFraudStore';
 import { GoogleLinkCheck } from '@/components/analyze/GoogleLinkCheck';
 import { Globe, Shield, Clock, AlertTriangle } from 'lucide-react';
 
 export default function LinkIntelligencePage() {
     const { inputText, result } = useFraudStore();
-    const [url, setUrl] = useState<string>('');
 
-    useEffect(() => {
-        const match = inputText.match(/(https?:\/\/[^\s]+)/g);
-        if (match) setUrl(match[0]);
-    }, [inputText]);
+    const match = inputText.match(/(https?:\/\/[^\s]+)/g);
+    const url = match ? match[0] : '';
 
     if (!url) {
         return (

@@ -12,8 +12,6 @@ export function Navbar() {
 
     const navItems = [
         { name: 'Analyze', href: '/analyze' },
-        { name: 'Email Verifier', href: '/email-analysis' },
-        { name: 'Image Forensics', href: '/image-analysis' },
         { name: 'Results', href: '/results' },
         { name: 'Compare', href: '/analyze/compare' },
         { name: 'Demo', href: '/demo' },

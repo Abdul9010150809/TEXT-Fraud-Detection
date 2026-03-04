@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, Part } from "@google/generative-ai";
 import { DEMO_DATASET } from "@/data/demo_dataset";
 
 const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
@@ -24,13 +24,20 @@ export interface AnalysisResponse {
     risky_phrases: string[];
     detected_signals: {
         urgency: boolean;
+        financial_lure: boolean;
         impersonation: boolean;
-        otp_request: boolean;
+        credential_theft: boolean;
         suspicious_url: boolean;
         ai_generated_tone: boolean;
-        image_text_mismatch?: boolean;
-        fake_branding?: boolean;
-        visual_artifacts?: boolean;
+        spelling_grammar_issues: boolean;
+        social_engineering: boolean;
+        crypto_investment_pitch: boolean;
+        threat_extortion: boolean;
+        job_scam: boolean;
+        spam_marketing: boolean;
+        regional_upi_fraud: boolean;
+        romance_scam: boolean;
+        tech_support_refund: boolean;
     };
     link_analysis: {
         domain: string;
@@ -53,18 +60,6 @@ export interface AnalysisResponse {
         is_official_domain: boolean;
         risk_reason: string | null;
     };
-    email_analysis?: {
-        is_email: boolean;
-        sender_domain_mismatch: boolean;
-        suspicious_subject: boolean;
-        attachment_risk: "None" | "Low" | "High";
-        headers_analysis: string;
-    };
-    image_analysis?: {
-        is_safe_content: boolean;
-        visual_anomalies: string[];
-        ocr_text_risk: "Low" | "Medium" | "High";
-    };
     counterfactual_safe_conditions: string[];
     campaign_detected: boolean;
     recommended_action: string[];
@@ -76,9 +71,11 @@ export interface AnalysisResponse {
     explanation: string;
     signals: string[];
     tone: "Normal" | "Urgent" | "Manipulative" | "AI-Like";
+    author_prediction: "AI Generated" | "Human Typed" | "Unknown";
+    api_signals?: Array<{ api: string; icon: string; verdict: string; score: number; flagged: boolean; detail: string }>;
 }
 
-export async function analyzeContent(text: string, imageBase64?: string, useMock: boolean = false): Promise<AnalysisResponse> {
+export async function analyzeContent(text: string, useMock: boolean = false): Promise<AnalysisResponse> {
     if (useMock || !API_KEY) {
         return getMockAnalysis(text);
     }
@@ -87,42 +84,55 @@ export async function analyzeContent(text: string, imageBase64?: string, useMock
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `
-      You are an expert AI Fraud Intelligence Analyst.
-      Analyze the content (Text, Image, Email) for fraud patterns using the Local Reference Database.
+      You are an expert AI Fraud Intelligence Analyst focusing ONLY on TEXT scams.
+      Analyze the text content for fraud patterns using the Local Reference Database.
 
       ${FEW_SHOT_EXAMPLES}
       
-      INPUT TEXT/EMAIL: "${text || "No text provided, analyze image text."}"
-      ${imageBase64 ? "IMAGE PROVIDED: Run visual forensics." : "NO IMAGE PROVIDED."}
+      INPUT TEXT: "${text || "No text provided."}"
       
       TASK Checklist:
-      1. **IMAGE PRE-CHECK**: If generic photo (no text/logos) -> MARK SAFE. 
-      2. **EMAIL ANALYSIS**: If the input looks like an email (Headers, Subject, Body):
-         - **SENDER INTELLIGENCE**: Check the 'SENDER' address against the 'BODY' content.
-           *   **Mismatch**: If body claims "PayPal/Apple/Bank" bu sender is Generic (gmail, yahoo, hotmail) -> **CRITICAL RISK**.
-           *   **Typosquatting**: Check sender domain for subtle errors (e.g., '@paypa1.com', '@amaz0n-support.net').
-         - Check Subject Line for Urgency/Threats.
-         - Check for suspicious attachment mentions (.exe, .zip).
-      3. **BANK VERIFICATION**: Check for Typosquatting (e.g. 'hdfkbank').
-      4. **SIMILARITY**: Does this look like the [DATASET_*] patterns above?
+      You MUST analyze the text for these 15 core scam signals:
+      1. urgency (Pressure tactics, "act now")
+      2. financial_lure (Lotteries, free money)
+      3. impersonation (Pretending to be bank/authority)
+      4. credential_theft (Asking for OTP/passwords)
+      5. suspicious_url (Shady or shortened links)
+      6. ai_generated_tone (Overly formal or robotic)
+      7. spelling_grammar_issues (Intentional typos to bypass filters)
+      8. social_engineering (Guilt trips, "I need help")
+      9. crypto_investment_pitch (Guaranteed ROI, BTC)
+      10. threat_extortion (Blackmail, data leaks)
+      11. job_scam (Fake employment, upfront payment)
+      12. spam_marketing (Unsolicited bulk marketing)
+      13. regional_upi_fraud (Localized UPI or CashApp fraud)
+      14. romance_scam (Fabricated relationships for exploitation)
+      15. tech_support_refund (Fake tech support, overpayment refund)
 
       RETURN VALID JSON:
       {
         "is_fraud": boolean,
         "risk_score": number (0-100),
         "risk_level": "Safe" | "Suspicious" | "High" | "Gray" | "Critical",
-        "fraud_type": ["Phishing", "Identity Theft", "Social Engineering", "AI Generated", "None", "Visual Scam", "Email Spoofing"],
+        "fraud_type": ["Phishing", "Identity Theft", "Social Engineering", "Extortion", "None"],
         "why_fraud": ["Reason 1"],
         "risky_phrases": ["substring 1"],
         "detected_signals": {
             "urgency": boolean,
+            "financial_lure": boolean,
             "impersonation": boolean,
-            "otp_request": boolean,
+            "credential_theft": boolean,
             "suspicious_url": boolean,
             "ai_generated_tone": boolean,
-            "image_text_mismatch": boolean,
-            "fake_branding": boolean,
-            "visual_artifacts": boolean
+            "spelling_grammar_issues": boolean,
+            "social_engineering": boolean,
+            "crypto_investment_pitch": boolean,
+            "threat_extortion": boolean,
+            "job_scam": boolean,
+            "spam_marketing": boolean,
+            "regional_upi_fraud": boolean,
+            "romance_scam": boolean,
+            "tech_support_refund": boolean
         },
         "link_analysis": {
             "domain": "string",
@@ -145,18 +155,6 @@ export async function analyzeContent(text: string, imageBase64?: string, useMock
             "is_official_domain": boolean,
             "risk_reason": "string"
         },
-        "email_analysis": {
-            "is_email": boolean,
-            "sender_domain_mismatch": boolean,
-            "suspicious_subject": boolean,
-            "attachment_risk": "None" | "Low" | "High",
-            "headers_analysis": "Summary"
-        },
-        "image_analysis": {
-            "is_safe_content": boolean,
-            "visual_anomalies": ["list"],
-            "ocr_text_risk": "Low" | "Medium" | "High"
-        },
         "counterfactual_safe_conditions": ["If X"],
         "campaign_detected": boolean,
         "recommended_action": ["Action"],
@@ -167,21 +165,12 @@ export async function analyzeContent(text: string, imageBase64?: string, useMock
         "confidence": number,
         "explanation": "Summary",
         "signals": ["List"],
-        "tone": "Normal" | "Urgent" | "Manipulative"
+        "tone": "Normal" | "Urgent" | "Manipulative",
+        "author_prediction": "AI Generated" | "Human Typed" | "Unknown"
       }
     `;
 
-        const parts: any[] = [{ text: prompt }];
-        if (imageBase64) {
-            const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-            parts.push({
-                inlineData: {
-                    data: base64Data,
-                    mimeType: "image/jpeg",
-                },
-            });
-        }
-
+        const parts: Part[] = [{ text: prompt }];
         const result = await model.generateContent(parts);
         const response = await result.response;
         const textOutput = response.text();
@@ -207,15 +196,22 @@ function getMockAnalysis(text: string): AnalysisResponse {
 
     // Initialize risk score and signals
     let riskScore = 0;
-    const detectedSignals: any = {
+    const detectedSignals = {
         urgency: false,
+        financial_lure: false,
         impersonation: false,
-        otp_request: false,
+        credential_theft: false,
         suspicious_url: false,
         ai_generated_tone: false,
-        image_text_mismatch: false,
-        fake_branding: false,
-        visual_artifacts: false
+        spelling_grammar_issues: false,
+        social_engineering: false,
+        crypto_investment_pitch: false,
+        threat_extortion: false,
+        job_scam: false,
+        spam_marketing: false,
+        regional_upi_fraud: false,
+        romance_scam: false,
+        tech_support_refund: false
     };
     const fraudTypes: string[] = [];
     const whyFraud: string[] = [];
@@ -259,7 +255,7 @@ function getMockAnalysis(text: string): AnalysisResponse {
     const otpKeywords = ['otp', 'one time password', 'verification code', 'verify', 'confirm', 'validate', 'authenticate', 'kyc', 'update details', 'update pan'];
     const otpMatches = otpKeywords.filter(kw => lowerText.includes(kw));
     if (otpMatches.length > 0) {
-        detectedSignals.otp_request = true;
+        detectedSignals.credential_theft = true;
         riskScore += 30;
         fraudTypes.push('Credential Theft');
         whyFraud.push(`Requesting sensitive information: "${otpMatches.join('", "')}" - credential harvesting attempt`);
@@ -308,42 +304,15 @@ function getMockAnalysis(text: string): AnalysisResponse {
         signals.push('Social Engineering');
     }
 
-    // 8. EMAIL ANALYSIS (if email format detected)
-    let emailAnalysis = {
-        is_email: false,
-        sender_domain_mismatch: false,
-        suspicious_subject: false,
-        attachment_risk: "None" as "None" | "Low" | "High",
-        headers_analysis: ""
-    };
-
-    if (lowerText.includes('sender:') || lowerText.includes('subject:') || lowerText.includes('[email_header_analysis_request]')) {
-        emailAnalysis.is_email = true;
-
-        // Check for sender domain mismatch
-        const senderMatch = text.match(/sender:\s*([^\n]+)/i);
-        if (senderMatch) {
-            const sender = senderMatch[1].toLowerCase();
-            const hasGenericDomain = /@(gmail|yahoo|hotmail|outlook|mail)\.com/i.test(sender);
-            const claimsOfficial = bankKeywords.some(kw => lowerText.includes(kw));
-
-            if (hasGenericDomain && claimsOfficial) {
-                emailAnalysis.sender_domain_mismatch = true;
-                riskScore += 40;
-                whyFraud.push('CRITICAL: Sender domain mismatch - claims to be official organization but uses generic email provider');
-                signals.push('Sender Spoofing');
-            }
-        }
-
-        // Check subject line
-        const subjectMatch = text.match(/subject:\s*([^\n]+)/i);
-        if (subjectMatch) {
-            const subject = subjectMatch[1].toLowerCase();
-            if (urgencyKeywords.some(kw => subject.includes(kw))) {
-                emailAnalysis.suspicious_subject = true;
-                riskScore += 15;
-            }
-        }
+    // 8. DATA LEAK/EXTORTION
+    const extortionKeywords = ['hack', 'recorded', 'webcam', 'password', 'leak', 'expose', 'bitcoin', 'payment'];
+    const extortionMatches = extortionKeywords.filter(kw => lowerText.includes(kw));
+    if (extortionMatches.length >= 3) {
+        detectedSignals.threat_extortion = true;
+        riskScore += 90;
+        fraudTypes.push('Extortion');
+        whyFraud.push('Extortion markers detected - usually associated with fake sextortion emails/texts');
+        signals.push('Threat/Extortion');
     }
 
     // 9. BANK VERIFICATION
@@ -361,6 +330,9 @@ function getMockAnalysis(text: string): AnalysisResponse {
     // 10. SAFE INDICATORS (Reduce risk score)
     const safeIndicators = ['thank you', 'regards', 'official', 'customer service', 'help desk'];
     const safeMatches = safeIndicators.filter(kw => lowerText.includes(kw));
+    if (safeMatches.length > 0 && riskScore < 50) {
+        riskScore = Math.max(0, riskScore - 15);
+    }
 
     // Very casual/normal conversation
     const casualPhrases = ['can you', 'could you', 'please send', 'notes', 'homework', 'meeting'];
@@ -371,7 +343,7 @@ function getMockAnalysis(text: string): AnalysisResponse {
 
     // If demo match found, use its risk level but with calculated score
     if (demoMatch) {
-        const demoRiskMap: any = {
+        const demoRiskMap: Record<string, number> = {
             'CRITICAL': 90,
             'HIGH': 75,
             'MEDIUM': 50,
@@ -382,17 +354,16 @@ function getMockAnalysis(text: string): AnalysisResponse {
         return {
             is_fraud: demoMatch.riskLevel !== 'LOW',
             risk_score: riskScore,
-            risk_level: demoMatch.riskLevel as any,
+            risk_level: demoMatch.riskLevel as "Safe" | "Suspicious" | "High" | "Critical",
             fraud_type: [demoMatch.fraudType],
             why_fraud: [demoMatch.explanation],
             risky_phrases: riskyPhrases.length > 0 ? riskyPhrases : ["account blocked"],
             detected_signals: detectedSignals,
             link_analysis: { domain: urls ? urls[0].replace(/https?:\/\//, '').split('/')[0] : "mock.com", shortened: /bit\.ly|tinyurl/i.test(text), brand_spoofing: detectedSignals.impersonation, google_presence: "Medium" },
             similar_case_match: { id: demoMatch.id, similarity_score: 95, description: demoMatch.explanation },
-            text_error_analysis: { typos: [], grammar_issues: [], score: 20 },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            text_error_analysis: (demoMatch as any).textErrorAnalysis || { typos: [], grammar_issues: [], score: 85 },
             bank_verification: bankVerification,
-            email_analysis: emailAnalysis,
-            image_analysis: { is_safe_content: true, visual_anomalies: [], ocr_text_risk: "Low" },
             counterfactual_safe_conditions: ["If sender used official domain", "If no urgency language was used"],
             campaign_detected: false,
             recommended_action: riskScore > 70 ? ["Do not click any links", "Report as spam", "Verify through official channels"] : ["Verify sender identity"],
@@ -400,7 +371,8 @@ function getMockAnalysis(text: string): AnalysisResponse {
             confidence: 90,
             explanation: demoMatch.explanation,
             signals: signals.length > 0 ? signals : ["Demo Match"],
-            tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal"
+            tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal",
+            author_prediction: detectedSignals.ai_generated_tone ? "AI Generated" : "Unknown"
         };
     }
 
@@ -453,10 +425,8 @@ function getMockAnalysis(text: string): AnalysisResponse {
             google_presence: riskScore > 60 ? "Low" : "Medium"
         },
         similar_case_match: undefined,
-        text_error_analysis: undefined,
+        text_error_analysis: { typos: [], grammar_issues: [], score: 85 },
         bank_verification: bankVerification,
-        email_analysis: emailAnalysis,
-        image_analysis: { is_safe_content: true, visual_anomalies: [], ocr_text_risk: "Low" },
         counterfactual_safe_conditions: isFraud ? ["Remove urgency language", "Use official communication channels", "Verify sender identity"] : [],
         campaign_detected: false,
         recommended_action: riskScore > 70 ? ["Do not respond", "Do not click links", "Report as spam", "Verify through official channels"] : riskScore > 30 ? ["Verify sender identity", "Check for official domain"] : ["Appears safe"],
@@ -467,6 +437,7 @@ function getMockAnalysis(text: string): AnalysisResponse {
         confidence: riskScore > 60 ? 85 : riskScore > 30 ? 70 : 60,
         explanation: explanation,
         signals: signals.length > 0 ? signals : ["Content Analysis Complete"],
-        tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal"
+        tone: detectedSignals.urgency ? "Urgent" : detectedSignals.ai_generated_tone ? "AI-Like" : "Normal",
+        author_prediction: detectedSignals.ai_generated_tone ? "AI Generated" : "Unknown"
     };
 }

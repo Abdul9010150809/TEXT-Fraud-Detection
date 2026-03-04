@@ -65,3 +65,22 @@ beautifulsoup4==4.12.2
 
 # For lxml (XML/HTML parsing)
 lxml==5.1.0
+
+# ==========================================
+# NEW: Multi-API Integration Dependencies
+# ==========================================
+
+# For async HTTP calls to external APIs
+httpx>=0.25.2
+
+# Telegram Bot support
+# python-telegram-bot==20.7
+
+# Language detection (fallback if LibreTranslate unavailable)
+langdetect==1.0.9
+
+# URL parsing and encoding utilities
+tldextract>=5.1.1
+
+# dotenv for loading .env file
+python-dotenv>=1.0.0

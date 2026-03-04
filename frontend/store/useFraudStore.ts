@@ -6,8 +6,6 @@ interface FraudStore {
     inputText: string;
     setInputText: (text: string) => void;
 
-    image: string | null; // Base64 image
-    setImage: (image: string | null) => void;
 
     isAnalyzing: boolean;
     setIsAnalyzing: (isAnalyzing: boolean) => void;
@@ -31,8 +29,6 @@ export const useFraudStore = create<FraudStore>((set) => ({
     inputText: '',
     setInputText: (text) => set({ inputText: text }),
 
-    image: null,
-    setImage: (image) => set({ image }),
 
     isAnalyzing: false,
     setIsAnalyzing: (isAnalyzing) => set({ isAnalyzing }),
@@ -52,7 +48,7 @@ export const useFraudStore = create<FraudStore>((set) => ({
     fillDemoData: (id) => {
         const item = DEMO_DATASET.find(d => d.id === id);
         if (item) {
-            set({ inputText: item.text, selectedScenario: id, image: null });
+            set({ inputText: item.text, selectedScenario: id });
         }
     }
 }));

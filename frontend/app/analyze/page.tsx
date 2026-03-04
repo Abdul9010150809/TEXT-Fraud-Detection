@@ -1,11 +1,10 @@
 "use client"
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFraudStore } from '@/store/useFraudStore';
 import { analyzeContent } from '@/lib/gemini';
-import { useDropzone } from 'react-dropzone';
-import { Upload, X, Loader2, Image as ImageIcon, ScanLine, Shield } from 'lucide-react';
+import { ScanLine, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -15,37 +14,21 @@ export default function AnalyzePage() {
     const router = useRouter();
     const {
         inputText, setInputText,
-        image, setImage,
         setIsAnalyzing, setResult,
-        demoMode, isAnalyzing: globalIsAnalyzing
+        demoMode
     } = useFraudStore();
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        const file = acceptedFiles[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImage(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-    }, [setImage]);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
-        accept: { 'image/*': [] },
-        maxFiles: 1
-    });
-
     const handleAnalyze = async () => {
-        if (!inputText && !image) return;
+        if (!inputText) return;
 
         setIsLoading(true);
         setIsAnalyzing(true);
         setResult(null);
 
         try {
-            const data = await analyzeContent(inputText, image || undefined, demoMode);
+            const data = await analyzeContent(inputText, demoMode);
             // Artificial delay for the "Scan" effect to be visible
             setTimeout(() => {
                 setResult(data);
@@ -99,47 +82,18 @@ export default function AnalyzePage() {
                 {/* Text Input */}
                 <Card className="p-4 border-2 focus-within:border-primary/50 transition-colors bg-card/50">
                     <Textarea
-                        placeholder="Paste suspicious message, email, or link here..."
+                        placeholder="Paste suspicious message or link here..."
                         className="min-h-[150px] text-lg resize-none border-none focus-visible:ring-0 p-0 shadow-none bg-transparent"
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                     />
                 </Card>
 
-                {/* Image Upload Area */}
-                <div {...getRootProps()} className={`
-                    border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all relative overflow-hidden
-                    ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50 hover:bg-muted/50'}
-                    ${image ? 'bg-muted/30' : ''}
-                `}>
-                    <input {...getInputProps()} />
-                    {image ? (
-                        <div className="relative inline-block">
-                            <img src={image} alt="Upload preview" className="h-48 rounded-lg shadow-md object-contain" />
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setImage(null); }}
-                                className="absolute -top-3 -right-3 bg-destructive text-white p-1 rounded-full shadow-sm hover:bg-destructive/90"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                            <div className="p-4 bg-muted rounded-full">
-                                <Upload className="w-6 h-6" />
-                            </div>
-                            <p className="font-medium">Drop screenshot here or click to upload</p>
-                            <p className="text-xs opacity-70">Supports JPG, PNG (Max 5MB)</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* Actions */}
                 <Button
                     size="lg"
                     className="w-full text-lg h-14 bg-gradient-to-r from-primary to-blue-600 hover:opacity-90 transition-opacity shadow-lg"
                     onClick={handleAnalyze}
-                    disabled={(!inputText && !image) || isLoading}
+                    disabled={!inputText || isLoading}
                 >
                     {isLoading ? "Processing..." : "Analyze Suspicious Item"}
                 </Button>

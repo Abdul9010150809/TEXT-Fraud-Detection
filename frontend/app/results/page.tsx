@@ -5,19 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useFraudStore } from '@/store/useFraudStore';
 import { RiskMeter } from '@/components/results/RiskMeter';
 import { TextHighlighter } from '@/components/results/TextHighlighter';
-import { ArrowLeft, Loader2, Check, AlertOctagon, Info, Image as ImageIcon, Sparkles, Scan, Eye, Database, FileText, AlignLeft, ShieldCheck, XCircle, Landmark as LandmarkIcon, SpellCheck, Mail, Paperclip, AlertTriangle, Smartphone, Search } from 'lucide-react';
+import { ArrowLeft, Loader2, Check, AlertOctagon, Info, Sparkles, Scan, Eye, Database, FileText, AlignLeft, ShieldCheck, XCircle, SpellCheck, Mail, Paperclip, AlertTriangle, Smartphone, Search, Bot, User } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 export default function ResultsPage() {
     const router = useRouter();
-    const { result, isAnalyzing, inputText, image } = useFraudStore();
+    const { result, isAnalyzing, inputText } = useFraudStore();
 
     useEffect(() => {
-        if (!isAnalyzing && !result && !inputText && !image) {
+        if (!isAnalyzing && !result && !inputText) {
             router.push('/analyze');
         }
-    }, [isAnalyzing, result, inputText, image, router]);
+    }, [isAnalyzing, result, inputText, router]);
 
     if (isAnalyzing) {
         return (
@@ -49,7 +49,7 @@ export default function ResultsPage() {
         show: { opacity: 1, y: 0 }
     };
 
-    const isSafeImage = result.image_analysis?.is_safe_content;
+
 
     // Google Search Comparison Function
     const handleGoogleSearch = () => {
@@ -101,7 +101,7 @@ export default function ResultsPage() {
                 {/* Left Column: Score & Summary */}
                 <div className="lg:col-span-1 space-y-6">
                     <motion.div variants={item} className="flex flex-col items-center bg-card border border-border p-8 rounded-2xl shadow-sm text-center relative overflow-hidden">
-                        <RiskMeter score={result.risk_score} level={result.risk_level as any} />
+                        <RiskMeter score={result.risk_score} level={result.risk_level as "Safe" | "Suspicious" | "High" | "Critical"} />
                         <h2 className={`text-2xl font-bold mt-6 ${(result.risk_level as string) === 'Critical' || (result.risk_level as string) === 'High' || (result.risk_level as string) === 'CRITICAL' || (result.risk_level as string) === 'HIGH' ? 'text-danger' :
                             (result.risk_level as string) === 'Suspicious' || (result.risk_level as string) === 'Gray' ? 'text-warning' :
                                 'text-safe'
@@ -118,6 +118,15 @@ export default function ResultsPage() {
                                 }`}>
                                 Tone: {result.tone}
                             </span>
+                            {result.author_prediction && (
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase border flex items-center gap-1 ${result.author_prediction === 'AI Generated' ? 'bg-purple-100 text-purple-700 border-purple-200' :
+                                    result.author_prediction === 'Human Typed' ? 'bg-indigo-100 text-indigo-700 border-indigo-200' :
+                                        'bg-slate-100 text-slate-700 border-slate-200'
+                                    }`}>
+                                    {result.author_prediction === 'AI Generated' ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                                    {result.author_prediction}
+                                </span>
+                            )}
                             {result.fraud_type.map((ft, i) => (
                                 <span key={i} className="px-3 py-1 rounded-full bg-muted text-xs font-bold uppercase">{ft}</span>
                             ))}
@@ -155,23 +164,6 @@ export default function ResultsPage() {
                             </div>
                         )}
 
-                        {/* Image Preview & Safety Tag */}
-                        {image && (
-                            <div className="relative group">
-                                <img src={image} alt="Analyzed" className="w-full rounded-lg border border-border object-cover max-h-48" />
-                                {isSafeImage ? (
-                                    <div className="absolute top-2 right-2 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <ShieldCheck className="w-3 h-3" />
-                                        Verified Safe Image
-                                    </div>
-                                ) : (
-                                    <div className="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <Sparkles className="w-3 h-3 text-yellow-400" />
-                                        Image Analyzed
-                                    </div>
-                                )}
-                            </div>
-                        )}
 
                         {/* Link Analysis Summary */}
                         {result.link_analysis && result.link_analysis.domain && (
@@ -215,44 +207,14 @@ export default function ResultsPage() {
                                             <FileText className="w-3 h-3 text-slate-400" />
                                             <span className="text-xs font-mono text-blue-300">{result.similar_case_match.id}</span>
                                         </div>
-                                        <p className="text-sm italic opacity-90">"{result.similar_case_match.description}"</p>
+                                        <p className="text-sm italic opacity-90">&quot;{result.similar_case_match.description}&quot;</p>
                                     </div>
                                 </div>
                             </div>
                         </motion.div>
                     )}
 
-                    {/* Email Intelligence Card (NEW) */}
-                    {result.email_analysis && result.email_analysis.is_email && (
-                        <motion.div variants={item} className="bg-card border-l-4 border-blue-500 p-6 rounded-2xl shadow-sm">
-                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-800 dark:text-blue-300">
-                                <Mail className="w-5 h-5" />
-                                Email Intelligence Check
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className={`p-3 rounded-lg ${result.email_analysis.sender_domain_mismatch ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'}`}>
-                                    <div className="font-bold text-sm">Sender Verification</div>
-                                    <div className="text-xs mt-1">{result.email_analysis.sender_domain_mismatch ? "Mismatched Sender (Spoofing Detected)" : "Sender Domain Aligns"}</div>
-                                </div>
-                                <div className={`p-3 rounded-lg ${result.email_analysis.suspicious_subject ? 'bg-orange-50 text-orange-800' : 'bg-muted text-muted-foreground'}`}>
-                                    <div className="font-bold text-sm">Subject Line</div>
-                                    <div className="text-xs mt-1">{result.email_analysis.suspicious_subject ? "Urgency/Scam Pattern Detected" : "Normal Subject Line"}</div>
-                                </div>
-                            </div>
-                            {result.email_analysis.attachment_risk !== "None" && (
-                                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                                    <Paperclip className="w-5 h-5 text-red-600" />
-                                    <div>
-                                        <div className="font-bold text-sm text-red-800">High Risk Attachment Detected</div>
-                                        <div className="text-xs text-red-700">Avoid opening .exe, .scr, or .zip files from unknown sources.</div>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="mt-4 text-xs font-mono text-muted-foreground bg-muted p-2 rounded">
-                                HDR: {result.email_analysis.headers_analysis}
-                            </div>
-                        </motion.div>
-                    )}
+
 
                     {/* Text Quality & Forensics Card */}
                     {result.text_error_analysis && (
@@ -335,20 +297,27 @@ export default function ResultsPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {result.detected_signals && Object.entries(result.detected_signals).map(([key, value]) => {
                                 const signalConfig: Record<string, { icon: React.ReactNode, label: string, desc: string }> = {
-                                    urgency: { icon: <AlertTriangle className="w-4 h-4 text-orange-500" />, label: "Urgency Tactics", desc: "Pressure to act fast" },
-                                    impersonation: { icon: <ShieldCheck className="w-4 h-4 text-blue-500" />, label: "Impersonation", desc: "Pretending to be authority" },
-                                    otp_request: { icon: <Smartphone className="w-4 h-4 text-purple-500" />, label: "OTP Request", desc: "Asking for sensitive codes" },
-                                    suspicious_url: { icon: <Paperclip className="w-4 h-4 text-red-500" />, label: "Suspicious Link", desc: "Embeds risky URLs" },
-                                    ai_generated_tone: { icon: <Sparkles className="w-4 h-4 text-indigo-500" />, label: "AI-Generated", desc: "Synthetic text patterns" },
-                                    image_text_mismatch: { icon: <AlignLeft className="w-4 h-4 text-yellow-500" />, label: "Image/Text Mismatch", desc: "Inconsistent content" },
-                                    fake_branding: { icon: <Scan className="w-4 h-4 text-pink-500" />, label: "Fake Branding", desc: "Unofficial logos detected" },
-                                    visual_artifacts: { icon: <Eye className="w-4 h-4 text-cyan-500" />, label: "Visual Artifacts", desc: "Edited/Manipulated pixels" }
+                                    urgency: { icon: <AlertTriangle className="w-4 h-4 text-orange-500" />, label: "Urgency/Pressure", desc: "Forces immediate action" },
+                                    financial_lure: { icon: <Sparkles className="w-4 h-4 text-yellow-500" />, label: "Financial Lure", desc: "Promises of money or prizes" },
+                                    impersonation: { icon: <ShieldCheck className="w-4 h-4 text-blue-500" />, label: "Impersonation", desc: "Pretends to be authority" },
+                                    credential_theft: { icon: <Smartphone className="w-4 h-4 text-purple-500" />, label: "Credential Theft", desc: "Asks for OTP/Passwords" },
+                                    suspicious_url: { icon: <Paperclip className="w-4 h-4 text-red-500" />, label: "Suspicious Link", desc: "Contains shady/shortened URLs" },
+                                    ai_generated_tone: { icon: <Scan className="w-4 h-4 text-indigo-500" />, label: "AI Scripted", desc: "Uses robotic templates" },
+                                    spelling_grammar_issues: { icon: <SpellCheck className="w-4 h-4 text-orange-500" />, label: "Spelling Errors", desc: "Contains intentional typos" },
+                                    social_engineering: { icon: <Eye className="w-4 h-4 text-cyan-500" />, label: "Social Engineering", desc: "Emotional manipulation" },
+                                    crypto_investment_pitch: { icon: <Database className="w-4 h-4 text-green-500" />, label: "Crypto Pitch", desc: "Guaranteed ROI/BTC mentions" },
+                                    threat_extortion: { icon: <AlertOctagon className="w-4 h-4 text-red-600" />, label: "Extortion Threat", desc: "Blackmail or data leak threats" },
+                                    job_scam: { icon: <AlignLeft className="w-4 h-4 text-sky-500" />, label: "Fake Job Offer", desc: "Employment lures & upfront fees" },
+                                    spam_marketing: { icon: <Mail className="w-4 h-4 text-slate-500" />, label: "Spam Marketing", desc: "Unsolicited promotional bulk" },
+                                    regional_upi_fraud: { icon: <Sparkles className="w-4 h-4 text-emerald-500" />, label: "UPI/CashApp Fraud", desc: "Localized payment requests" },
+                                    romance_scam: { icon: <Eye className="w-4 h-4 text-pink-500" />, label: "Romance Scam", desc: "Fabricated relationships" },
+                                    tech_support_refund: { icon: <Scan className="w-4 h-4 text-teal-500" />, label: "Tech Support/Refund", desc: "Fake overpayment refunds" }
                                 };
 
                                 const config = signalConfig[key] || { icon: <Info className="w-4 h-4" />, label: key.replace(/_/g, ' '), desc: "Signal detected" };
 
                                 return (
-                                    <div key={key} className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${value
+                                    <motion.div variants={item} key={key} className={`flex items-start gap-3 p-3 rounded-xl border transition-all ${value
                                         ? 'bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30'
                                         : 'bg-muted/20 border-border opacity-60 hover:opacity-100'
                                         }`}>
@@ -370,11 +339,39 @@ export default function ResultsPage() {
                                                 {config.desc}
                                             </p>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
                     </motion.div>
+
+                    {/* ===== API Intelligence Panel ===== */}
+                    {result.api_signals && result.api_signals.length > 0 && (
+                        <motion.div variants={item} className="bg-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-700">
+                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-yellow-400" />
+                                Real-World API Intelligence
+                                <span className="ml-auto text-xs bg-yellow-400 text-slate-900 px-2 py-0.5 rounded-full font-bold">LIVE APIs</span>
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {result.api_signals.map((sig: { api: string; icon: string; verdict: string; score: number; flagged: boolean; detail: string }, i: number) => (
+                                    <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${sig.flagged ? 'bg-red-900/20 border-red-700/40' : 'bg-green-900/20 border-green-700/40'}`}>
+                                        <span className="text-xl">{sig.icon}</span>
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="text-xs font-bold text-slate-300">{sig.api}</span>
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${sig.flagged ? 'bg-red-500 text-white' : 'bg-green-600 text-white'}`}>
+                                                    {sig.verdict}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-slate-400 mt-0.5 truncate">{sig.detail}</p>
+                                        </div>
+                                        <span className={`ml-auto text-xs font-bold shrink-0 ${sig.flagged ? 'text-red-400' : 'text-green-400'}`}>{sig.score}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
 
                 </div>
             </div>

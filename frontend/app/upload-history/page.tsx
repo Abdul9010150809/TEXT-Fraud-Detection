@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Search, ShieldCheck, AlertTriangle, FileText, Smartphone, Mail, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Clock, Search, ShieldCheck, Smartphone, Mail, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function UploadHistoryPage() {

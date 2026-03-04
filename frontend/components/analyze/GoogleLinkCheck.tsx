@@ -4,17 +4,14 @@ import React, { useState } from 'react';
 import { Search, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 
 export function GoogleLinkCheck({ url }: { url: string }) {
-    const [checking, setChecking] = useState(false);
     const [googlePresence, setGooglePresence] = useState<'HIGH' | 'MEDIUM' | 'LOW' | 'NOT_FOUND' | null>(null);
 
     const handleCheck = () => {
         if (!url) return;
-        setChecking(true);
         setGooglePresence(null);
 
         // Mock API delay for badge
         setTimeout(() => {
-            setChecking(false);
             // Mock logic for presence
             if (url.includes('sbi') || url.includes('amazon') || url.includes('google')) {
                 setGooglePresence('HIGH');

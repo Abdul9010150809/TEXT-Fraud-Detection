@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Circle, ArrowRight, Server, Globe, Search, Shield } from "lucide-react";
+import { ArrowRight, Server, Globe, Search, Shield } from "lucide-react";
 
 export default function TimelinePage() {
     const steps = [

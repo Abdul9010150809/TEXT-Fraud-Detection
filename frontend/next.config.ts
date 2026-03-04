@@ -15,10 +15,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // ESLint configuration
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+
   // Transpile packages
   transpilePackages: [],
 };

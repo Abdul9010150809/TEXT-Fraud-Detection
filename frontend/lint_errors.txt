@@ -1,0 +1,116 @@
+
+> frontend@0.1.0 lint
+> eslint
+
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\analyze\compare\page.tsx
+  40:25   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  40:146  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  56:50   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  56:66   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  78:25   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  78:144  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  86:54   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  86:68   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  86:71   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  86:83   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  90:57   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  90:79   error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\analyze\page.tsx
+    8:21  warning  'Loader2' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    8:39  warning  'ImageIcon' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   20:32  warning  'globalIsAnalyzing' is assigned a value but never used                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  118:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\compare\page.tsx
+  4:10  warning  'Badge' is defined but never used       @typescript-eslint/no-unused-vars
+  5:20  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\demo\page.tsx
+  71:58  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\email-analysis\page.tsx
+  7:16  warning  'Paperclip' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\false-positive-review\page.tsx
+   5:21   warning  'CheckCircle' is defined but never used                          @typescript-eslint/no-unused-vars
+   5:67   warning  'MessageSquare' is defined but never used                        @typescript-eslint/no-unused-vars
+  42:43   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  42:61   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  42:145  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  51:64   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  51:75   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  51:113  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  61:62   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  61:70   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  61:83   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  61:100  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  63:43   error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  63:61   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  63:130  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\image-analysis\page.tsx
+   8:67  warning  'Eye' is defined but never used                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  77:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\results\email\page.tsx
+    6:10  warning  'RiskMeter' is defined but never used                            @typescript-eslint/no-unused-vars
+    7:30  warning  'Check' is defined but never used                                @typescript-eslint/no-unused-vars
+    7:37  warning  'AlertOctagon' is defined but never used                         @typescript-eslint/no-unused-vars
+    9:10  warning  'motion' is defined but never used                               @typescript-eslint/no-unused-vars
+  117:37  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  117:46  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\results\link\page.tsx
+  14:20  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\results\link\page.tsx:14:20
+  12 |     useEffect(() => {
+  13 |         const match = inputText.match(/(https?:\/\/[^\s]+)/g);
+> 14 |         if (match) setUrl(match[0]);
+     |                    ^^^^^^ Avoid calling setState() directly within an effect
+  15 |     }, [inputText]);
+  16 |
+  17 |     if (!url) {  react-hooks/set-state-in-effect
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\results\page.tsx
+    8:66   warning  'ImageIcon' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    8:163  warning  'LandmarkIcon' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  104:90   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  161:33   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  218:82   error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+  218:122  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\results\timeline\page.tsx
+   3:23  warning  'ArrowDown' is defined but never used                            @typescript-eslint/no-unused-vars
+  56:66  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\timeline\page.tsx
+  2:10  warning  'CheckCircle2' is defined but never used  @typescript-eslint/no-unused-vars
+  2:24  warning  'Circle' is defined but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\app\upload-history\page.tsx
+  5:49  warning  'AlertTriangle' is defined but never used  @typescript-eslint/no-unused-vars
+  5:64  warning  'FileText' is defined but never used       @typescript-eslint/no-unused-vars
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\components\analyze\GoogleLinkCheck.tsx
+  7:12  warning  'checking' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Lenovo\Downloads\TEXT-Fraud-Detection\frontend\lib\gemini.ts
+  174:22  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  210:28  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  312:9   error    'emailAnalysis' is never reassigned. Use 'const' instead  prefer-const
+  363:11  warning  'safeMatches' is assigned a value but never used          @typescript-eslint/no-unused-vars
+  374:28  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+  385:48  error    Unexpected any. Specify a different type                  @typescript-eslint/no-explicit-any
+
+Γ£û 63 problems (38 errors, 25 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

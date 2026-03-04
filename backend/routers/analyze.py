@@ -54,6 +54,22 @@ class TextAnalyzeRequest(BaseModel):
         max_length=MAX_TEXT_LENGTH,
         description="The text message to analyze"
     )
+    # Text specific signals (15 features)
+    urgency_deadline: bool = Field(False, description="Detects fabricated deadlines or false urgency.")
+    financial_lure: bool = Field(False, description="Detects lottery, prize, or unlikely financial reward lures.")
+    impersonation: bool = Field(False, description="Detects spoofing of authority figures, brands, or executives.")
+    credential_theft: bool = Field(False, description="Detects direct requests for passwords, OTPs, or PII.")
+    suspicious_url: bool = Field(False, description="Detects obfuscated, deceptive, or malicious URLs within text.")
+    ai_generated_tone: bool = Field(False, description="Detects hyper-formal, repetitive, or anomalous AI-generated phrasing.")
+    spelling_grammar_forensics: bool = Field(False, description="Detects intentional spelling errors used to bypass basic spam filters.")
+    social_engineering: bool = Field(False, description="Detects psychological manipulation strategies (fear, greed, trust).")
+    crypto_pitch: bool = Field(False, description="Detects 'get-rich-quick' crypto investment or mining schemes.")
+    threat_extortion: bool = Field(False, description="Detects blackmail, sextortion, or legal threats.")
+    job_scam: bool = Field(False, description="Detects fake employment offers requiring upfront payment.")
+    spam_marketing: bool = Field(False, description="Detects unsolicited bulk marketing spam.")
+    regional_upi_fraud: bool = Field(False, description="Detects localized payment system, UPI, or cashapp scams.")
+    romance_scam: bool = Field(False, description="Detects fabricated relationships aiming for financial exploitation.")
+    tech_support_refund: bool = Field(False, description="Detects fake tech support or overpayment refund scams.")
     user_id: Optional[str] = Field(
         None, 
         description="Optional user ID for logging"
@@ -69,6 +85,11 @@ class TextAnalyzeRequest(BaseModel):
             raise ValueError('Text cannot be empty or whitespace only')
         return v.strip()
 
+
+class TextErrorAnalysis(BaseModel):
+    typos: List[str]
+    grammar_issues: List[str]
+    score: int
 
 class LinkIntelligence(BaseModel):
     domain_age_days: int
@@ -86,6 +107,10 @@ class TextAnalyzeResponse(BaseModel):
     why_fraud: List[str]
     detected_signals: Dict[str, bool]
     link_intelligence: Optional[LinkIntelligence]
+    text_error_analysis: Optional[TextErrorAnalysis] = None
+    author_prediction: str = Field("Unknown", description="Predicts if text is 'AI Generated' or 'Human Typed'")
+    api_signals: Optional[List[Dict[str, Any]]] = Field(None, description="Individual API verdict signals")
+    api_report: Optional[Dict[str, Any]] = Field(None, description="Raw multi-API combined report")
     recommended_action: List[str]
     confidence: float
     processing_time: float
@@ -138,27 +163,62 @@ async def analyze_text(
 ) -> TextAnalyzeResponse:
     """
     Analyze a text message for fraud classification (V2).
+    Runs multi-API analysis via the orchestrator when available.
     """
     
     try:
         # Sanitize input
         text = sanitize_text(payload.text)
+        start_time = time.time()
         
         # Import classifier
-        from ai_modules.text_classifier import TextClassifier
+        from backend.ai_modules.text_classifier import TextClassifier
         
-        # Initialize and classify
-        # V2: No arguments needed for init
+        # Initialize and classify (heuristic baseline)
         classifier = TextClassifier()
         result = classifier.classify(text)
-        
-        # Build response using to_json() (which returns dict)
         response_data = result.to_json()
-        response_data["timestamp"] = datetime.utcnow().isoformat()
-        response_data["processing_time"] = result.processing_time
         
-        # Log analysis for dataset expansion
-        log_analysis(payload.dict(), response_data)
+        # --- Run external API orchestrator in parallel (non-blocking) ---
+        api_report = None
+        api_signals = None
+        try:
+            from backend.integrations.api_orchestrator import run_full_analysis
+            api_report = await run_full_analysis(text)
+            api_signals = api_report.get("api_signals", [])
+            
+            # Blend the combined API risk score with the heuristic score
+            api_score = api_report.get("combined_risk_score", 0)
+            if api_score > 0:
+                # Weighted blend: 40% heuristic, 60% real APIs
+                blended = int(response_data["risk_score"] * 0.4 + api_score * 0.6)
+                response_data["risk_score"] = blended
+                
+                # Update risk level from blended score
+                if blended >= 80:
+                    response_data["risk_level"] = "Critical"
+                    response_data["is_fraud"] = True
+                elif blended >= 60:
+                    response_data["risk_level"] = "High"
+                    response_data["is_fraud"] = True
+                elif blended >= 35:
+                    response_data["risk_level"] = "Suspicious"
+                else:
+                    response_data["risk_level"] = "Safe"
+                    response_data["is_fraud"] = False
+                    
+        except ImportError:
+            logger.info("API orchestrator not available, using heuristic only")
+        except Exception as api_err:
+            logger.warning(f"API orchestrator error (continuing without): {api_err}")
+        
+        response_data["timestamp"] = datetime.utcnow().isoformat()
+        response_data["processing_time"] = time.time() - start_time
+        response_data["api_signals"] = api_signals
+        response_data["api_report"] = api_report
+        
+        # Log analysis
+        log_analysis(payload.model_dump(), response_data)
         
         logger.info(
             f"Analyzed text: is_fraud={response_data['is_fraud']}, "

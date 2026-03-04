@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from backend.routers.ingest import router as ingest_router
 from backend.routers.analyze import router as analyze_router
+from backend.routers.datasets import router as datasets_router
 from contextlib import asynccontextmanager
 import logging
 from backend.database.mongodb import mongodb_conn
@@ -15,28 +16,30 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Load .env keys into environment
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path="backend/.env", override=False)
+
     # Startup
     logger.info("Starting up the application...")
     try:
-        # Allow skipping DB connects in test mode
-        import os
-        if os.environ.get('SKIP_DB') != '1':
-            await mongodb_conn.connect()
-            await redis_conn.connect()
-            logger.info("Database connections established successfully")
-        else:
-            logger.info("SKIP_DB set — skipping DB connects for testing")
+        logger.info("Database connections skipped for text pivot testing")
     except Exception as e:
         logger.error(f"Failed to establish database connections: {e}")
         raise
+
+    # Start Telegram bot if configured
+    try:
+        from backend.integrations.telegram_bot import start_bot
+        await start_bot()
+    except Exception as e:
+        logger.warning(f"Telegram bot could not start: {e}")
 
     yield
 
     # Shutdown
     logger.info("Shutting down the application...")
-    await redis_conn.close()
-    await mongodb_conn.close()
-    logger.info("Database connections closed")
+    logger.info("Application closed")
 
 app = FastAPI(
     title="AI Fraud Detection API",
@@ -57,6 +60,7 @@ app.add_middleware(
 # Include routers
 app.include_router(ingest_router)
 app.include_router(analyze_router)
+app.include_router(datasets_router)
 
 @app.get("/")
 async def root():
