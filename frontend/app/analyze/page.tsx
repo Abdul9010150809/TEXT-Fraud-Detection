@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFraudStore } from '@/store/useFraudStore';
 import { analyzeContent } from '@/lib/gemini';

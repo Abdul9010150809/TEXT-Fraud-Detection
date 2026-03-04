@@ -9,47 +9,56 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/datasets", tags=["datasets"])
 
-# Define paths to existing datasets
+# Define path to Datasets directory
 DATASETS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "Datasets")
 
-DATASET_MAP = {
-    "jobs": {
-        "path": os.path.join(DATASETS_DIR, "archive", "fake_real_job_postings_3000x25.csv"),
-    },
-    "spam": {
-        "path": os.path.join(DATASETS_DIR, "archive (1)", "spam_ham_india.csv"),
-    },
-    "phishing": {
-        "path": os.path.join(DATASETS_DIR, "archive (3)", "Phishing_Legitimate_full.csv"),
-    }
-}
+def get_all_datasets() -> Dict[str, Dict[str, str]]:
+    """Dynamically scan the Datasets directory for all CSV files."""
+    dataset_map = {}
+    if not os.path.exists(DATASETS_DIR):
+        return dataset_map
+        
+    for root, _, files in os.walk(DATASETS_DIR):
+        for file in files:
+            if file.endswith('.csv'):
+                # Extract clean name for ID (e.g. from 'spam_ham_india.csv' to 'spam_ham_india')
+                dataset_id = os.path.splitext(file)[0].lower()
+                # Create a readable name path 
+                rel_dir = os.path.relpath(root, DATASETS_DIR)
+                if rel_dir == ".": rel_dir = "root"
+                
+                dataset_map[dataset_id] = {
+                    "path": os.path.join(root, file),
+                    "folder": rel_dir
+                }
+    return dataset_map
 
 @router.get("/")
 async def list_datasets():
-    """Returns a list of available configured datasets"""
+    """Returns a list of all dynamically discovered datasets"""
+    dataset_map = get_all_datasets()
     available = []
-    for k, v in DATASET_MAP.items():
-        exists = os.path.exists(v["path"])
+    for k, v in dataset_map.items():
         available.append({
             "id": k,
-            "available": exists,
-            "path": v["path"] if exists else "File not found"
+            "folder": v["folder"],
+            "available": True,
+            "path": v["path"]
         })
     return {"datasets": available}
 
 @router.get("/{dataset_type}/sample")
-async def get_dataset_sample(dataset_type: str = Path(..., description="The type of dataset to sample from")):
-    """Returns a random row sample formatted as text from the specified dataset CSV."""
+async def get_dataset_sample(dataset_type: str = Path(..., description="The ID (filename without extension) of dataset to sample from")):
+    """Returns a random row sample formatted as text from the dynamically discovered CSV."""
     
-    if dataset_type not in DATASET_MAP:
-        raise HTTPException(status_code=404, detail=f"Dataset '{dataset_type}' not configured. Available: {list(DATASET_MAP.keys())}")
+    dataset_map = get_all_datasets()
+    
+    if dataset_type not in dataset_map:
+        raise HTTPException(status_code=404, detail=f"Dataset '{dataset_type}' not found. Available count: {len(dataset_map)}")
         
-    config = DATASET_MAP[dataset_type]
+    config = dataset_map[dataset_type]
     file_path = config["path"]
     
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail=f"Data file not found at {file_path}")
-
     try:
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             reader = csv.reader(f)
@@ -65,16 +74,14 @@ async def get_dataset_sample(dataset_type: str = Path(..., description="The type
             random_row = random.choice(rows)
             text_content = ""
             
-            # Smart text extraction
-            if dataset_type == "jobs":
-                # idx 2 is description
-                text_content = random_row[2] if len(random_row) > 3 else " | ".join(random_row)
-            elif dataset_type == "spam":
-                # India spam is generally text in col index 1
-                text_content = random_row[1] if len(random_row) > 1 else random_row[0]
+            # Smart text extraction logic: find the longest text field in the row
+            # This makes it generic across any dataset shape
+            valid_texts = [str(cell) for cell in random_row if len(str(cell).strip()) > 3]
+            if valid_texts:
+                # Get the cell with the most characters
+                text_content = max(valid_texts, key=len)
             else:
-                # Phishing URLs might be in col 0 or 1
-                text_content = random_row[1] if len(random_row) > 1 else " | ".join(random_row)
+                text_content = " | ".join(random_row)
             
             row_dict = dict(zip(headers, random_row))
             
@@ -89,5 +96,5 @@ async def get_dataset_sample(dataset_type: str = Path(..., description="The type
             return result
             
     except Exception as e:
-        logger.error(f"Error reading dataset {dataset_type}: {e}")
+        logger.error(f"Error reading dataset {dataset_type} at {file_path}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

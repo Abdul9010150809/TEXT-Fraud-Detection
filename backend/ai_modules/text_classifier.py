@@ -29,9 +29,12 @@ class TextClassifier:
         why_fraud = ["No issues detected."]
         
         # Basic urgency/financial simulation
-        if "urgent" in text_lower or "immediate" in text_lower:
+        has_urgency = "urgent" in text_lower or "immediate" in text_lower
+        has_financial = "lottery" in text_lower or "won" in text_lower
+        
+        if has_urgency:
             risk_score += 40
-        if "lottery" in text_lower or "won" in text_lower:
+        if has_financial:
             risk_score += 40
             
         if risk_score > 70:
@@ -47,8 +50,8 @@ class TextClassifier:
             "fraud_type": fraud_type,
             "why_fraud": why_fraud,
             "detected_signals": {
-                "urgency": False, 
-                "financial_lure": False, 
+                "urgency": has_urgency, 
+                "financial_lure": has_financial, 
                 "impersonation": False, 
                 "credential_theft": False, 
                 "suspicious_url": False, 
@@ -69,6 +72,7 @@ class TextClassifier:
                 "grammar_issues": [],
                 "score": 85 if not is_fraud else 40
             },
+            "author_prediction": "Unknown",
             "recommended_action": ["Always verify sources"],
             "confidence": 0.8
         }
