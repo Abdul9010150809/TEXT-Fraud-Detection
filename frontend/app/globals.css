@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+
+    /* Risk Colors - Safe (Green) */
+    --safe: 142.1 76.2% 36.3%;
+    --safe-foreground: 355.7 100% 97.3%;
+
+    /* Risk Colors - Warning (Yellow/Orange) */
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 10%;
+
+    /* Risk Colors - Danger (Red) */
+    --danger: 0 84.2% 60.2%;
+    --danger-foreground: 210 40% 98%;
+
+    --font-inter: 'Inter', sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+
+    --safe: 142.1 70.6% 45.3%;
+    --safe-foreground: 144.9 80.4% 10%;
+
+    --warning: 48 96% 53%;
+    --warning-foreground: 38 92% 10%;
+
+    --danger: 0 62.8% 30.6%;
+    --danger-foreground: 210 40% 98%;
+  }
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
