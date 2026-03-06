@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { saveComparePayload } from "@/lib/googleVerification";
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -73,15 +74,22 @@ export default function ResultsPage() {
     show: { opacity: 1, y: 0 },
   };
 
-  // Google Search Comparison Function
-  const handleGoogleSearch = () => {
-    // Extract key phrases from the text for better search results
-    const searchText = inputText || "";
-    const truncatedText = searchText.substring(0, 200); // Limit to 200 chars for URL
-    const searchQuery = `is this fraud scam: ${truncatedText}`;
-    const encodedQuery = encodeURIComponent(searchQuery);
-    const googleSearchUrl = `https://www.google.com/search?q=${encodedQuery}`;
-    window.open(googleSearchUrl, "_blank");
+  const handleGoogleCompare = () => {
+    if (!inputText || !result) return;
+
+    saveComparePayload({
+      mode: "text",
+      input: inputText,
+      fraudguard: {
+        isFraud: result.is_fraud,
+        riskScore: result.risk_score,
+        riskLevel: String(result.risk_level),
+        messageType: result.message_type,
+      },
+      timestamp: Date.now(),
+    });
+
+    router.push("/analyze/compare?mode=text");
   };
 
   return (
@@ -113,9 +121,9 @@ export default function ResultsPage() {
         {/* Google Search Comparison Button */}
         {inputText && (
           <button
-            onClick={handleGoogleSearch}
+            onClick={handleGoogleCompare}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
-            title="Search Google to verify if this is a known scam"
+            title="Verify this content with Google and compare verdicts"
           >
             <Search className="w-4 h-4" />
             <span className="hidden sm:inline">Compare with Google</span>

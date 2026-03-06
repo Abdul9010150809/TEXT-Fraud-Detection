@@ -44,6 +44,17 @@ const FRAUD_EXAMPLES = [
   },
 ];
 
+const SAFE_EXAMPLES = [
+  {
+    title: "Team Update",
+    text: "Hi team, the client review is moved to 3 PM tomorrow. Please bring your sprint notes and blockers list.",
+  },
+  {
+    title: "Order Confirmation",
+    text: "Your order #12984 has been confirmed and will be delivered by Monday. Track status from your account dashboard.",
+  },
+];
+
 export default function AnalyzePage() {
   const router = useRouter();
   const { inputText, setInputText, setIsAnalyzing, setResult, demoMode } =
@@ -73,6 +84,20 @@ export default function AnalyzePage() {
       setIsAnalyzing(false);
       alert("Error analyzing content. Please try again.");
     }
+  };
+
+  const handleAnalyzeAndGoogleCompare = () => {
+    if (!inputText || inputText.length < 10) {
+      alert("Please enter at least 10 characters to search on Google");
+      return;
+    }
+
+    // Create Google search query
+    const searchQuery = `is this fraud or scam: ${inputText.substring(0, 200)}`;
+    const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+
+    // Open Google in new tab
+    window.open(googleUrl, "_blank");
   };
 
   const handleExampleClick = (text: string) => {
@@ -195,15 +220,47 @@ export default function AnalyzePage() {
             )}
           </div>
 
-          <Button
-            size="lg"
-            className="gradient-button w-full text-base h-12 rounded-lg font-semibold hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleAnalyze}
-            disabled={!inputText || inputText.length < 10 || isLoading}
-          >
-            <Zap className="w-5 h-5 mr-2" />
-            {isLoading ? "Analyzing..." : "Analyze Now"}
-          </Button>
+          <div className="bg-card border border-border rounded-lg p-4">
+            <p className="text-sm font-semibold mb-3">
+              Demo Examples (Safe + Scam)
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setInputText(SAFE_EXAMPLES[0].text)}
+                className="flex-1 px-4 py-2 rounded-md border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 text-sm font-medium hover:opacity-90"
+              >
+                Load Safe Demo
+              </button>
+              <button
+                onClick={() => setInputText(FRAUD_EXAMPLES[0].text)}
+                className="flex-1 px-4 py-2 rounded-md border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 text-sm font-medium hover:opacity-90"
+              >
+                Load Scam Demo
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              size="lg"
+              className="gradient-button flex-1 text-base h-12 rounded-lg font-semibold hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleAnalyze}
+              disabled={!inputText || inputText.length < 10 || isLoading}
+            >
+              <Zap className="w-5 h-5 mr-2" />
+              {isLoading ? "Analyzing..." : "Analyze Now"}
+            </Button>
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                void handleAnalyzeAndGoogleCompare();
+              }}
+              className="h-12 px-6 rounded-lg border-2 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold inline-flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            >
+              Compare with Google
+            </Link>
+          </div>
 
           {/* Info Box */}
           <div className="bg-card border border-border rounded-lg p-4 text-sm text-muted-foreground space-y-2">

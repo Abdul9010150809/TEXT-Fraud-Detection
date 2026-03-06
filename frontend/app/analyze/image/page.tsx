@@ -52,6 +52,11 @@ interface TextAnalyzeApiResponse {
   confidence?: number;
 }
 
+const IMAGE_DEMOS = {
+  safe: "Screenshot with normal team discussion, order confirmation, or scheduling message.",
+  scam: "Screenshot with urgency + account blocked message + OTP/password request + suspicious link.",
+};
+
 export default function ImageAnalyzePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -274,6 +279,20 @@ export default function ImageAnalyzePage() {
     }
   };
 
+  const handleGoogleCompare = () => {
+    if (!result || !result.extracted_text?.trim()) {
+      setError("Analyze image first to extract text, then verify with Google.");
+      return;
+    }
+
+    // Create Google search query from extracted text
+    const searchQuery = `is this fraud or scam: ${result.extracted_text.substring(0, 200)}`;
+    const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+
+    // Open Google in new tab
+    window.open(googleUrl, "_blank");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <div className="container mx-auto px-4 py-12">
@@ -301,6 +320,30 @@ export default function ImageAnalyzePage() {
         {/* Upload Section */}
         <Card className="max-w-4xl mx-auto p-8 mb-8 border-2">
           <div className="space-y-6">
+            <div className="rounded-lg border border-border p-4 bg-muted/20">
+              <p className="text-sm font-semibold mb-3">
+                Demo Examples (Safe + Scam)
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3 text-sm">
+                <div className="rounded-md border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20 p-3">
+                  <p className="font-semibold text-green-700 dark:text-green-300 mb-1">
+                    Safe Demo
+                  </p>
+                  <p className="text-green-700/90 dark:text-green-300/90">
+                    {IMAGE_DEMOS.safe}
+                  </p>
+                </div>
+                <div className="rounded-md border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 p-3">
+                  <p className="font-semibold text-red-700 dark:text-red-300 mb-1">
+                    Scam Demo
+                  </p>
+                  <p className="text-red-700/90 dark:text-red-300/90">
+                    {IMAGE_DEMOS.scam}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* File Input */}
             <div
               onClick={() => fileInputRef.current?.click()}
@@ -361,23 +404,35 @@ export default function ImageAnalyzePage() {
             )}
 
             {selectedFile && (
-              <Button
-                onClick={analyzeImage}
-                disabled={isAnalyzing}
-                className="w-full py-6 text-lg bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Extracting & Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-5 h-5 mr-2" />
-                    Analyze Image
-                  </>
-                )}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={analyzeImage}
+                  disabled={isAnalyzing}
+                  className="flex-1 py-6 text-lg bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      Extracting & Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-5 h-5 mr-2" />
+                      Analyze Image
+                    </>
+                  )}
+                </Button>
+                <Link
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGoogleCompare();
+                  }}
+                  className="sm:w-auto w-full px-6 rounded-lg border-2 border-blue-500 text-blue-600 dark:text-blue-400 font-semibold inline-flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                >
+                  Compare with Google
+                </Link>
+              </div>
             )}
           </div>
         </Card>
