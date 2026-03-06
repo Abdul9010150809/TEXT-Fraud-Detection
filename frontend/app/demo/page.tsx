@@ -13,9 +13,11 @@ import {
   Paperclip,
   Loader2,
   ArrowRight,
+  Search,
 } from "lucide-react";
 import React from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function DemoHubPage() {
   const router = useRouter();
@@ -71,6 +73,17 @@ export default function DemoHubPage() {
             <span className="text-primary font-bold">FraudGuard</span> with
             real-world fraud examples and live datasets.
           </p>
+          <div className="pt-2">
+            <Link
+              href="https://www.google.com/search?q=latest+fraud+scam+patterns"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"
+            >
+              <Search className="w-4 h-4" />
+              Compare with Google
+            </Link>
+          </div>
         </motion.div>
 
         {/* Demo Scenarios Section */}

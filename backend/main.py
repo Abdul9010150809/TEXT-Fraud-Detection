@@ -4,6 +4,9 @@ import uvicorn
 from backend.routers.ingest import router as ingest_router
 from backend.routers.analyze import router as analyze_router
 from backend.routers.datasets import router as datasets_router
+from backend.routers.link_analyzer import router as link_router
+from backend.routers.email_analyzer import router as email_router
+from backend.routers.image_analyzer import router as image_router
 from contextlib import asynccontextmanager
 import logging
 from backend.ai_modules.database.mongodb import mongodb_conn
@@ -61,6 +64,9 @@ app.add_middleware(
 app.include_router(ingest_router)
 app.include_router(analyze_router)
 app.include_router(datasets_router)
+app.include_router(link_router)
+app.include_router(email_router)
+app.include_router(image_router)
 
 @app.get("/")
 async def root():

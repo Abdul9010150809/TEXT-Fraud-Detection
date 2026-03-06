@@ -103,6 +103,7 @@ class TextAnalyzeResponse(BaseModel):
     is_fraud: bool
     risk_score: float
     risk_level: str
+    text_category: str = Field(..., description="Type of message detected (e.g., Phishing Attempt, Job Scam, Benign Personal/Business Message)")
     fraud_type: List[str]
     why_fraud: List[str]
     detected_signals: Dict[str, bool]

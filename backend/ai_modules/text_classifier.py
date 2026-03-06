@@ -67,6 +67,18 @@ class TextClassifier:
         "tech support", "refund", "remote access", "anydesk", "teamviewer",
         "system infected", "windows license"
     }
+    
+    ROMANCE_FRAUD_TERMS = {
+        "beautiful", "love you", "miss you", "care about you", "cannot stop thinking",
+        "soulmate", "forever with you", "help you financially", "send you money",
+        "share your bank", "share your details", "deepest feelings", "true love"
+    }
+    
+    MONEY_TRANSFER_TERMS = {
+        "bank details", "account number", "transfer money", "wire transfer", 
+        "send funds", "payment details", "banking information", "swift code",
+        "iban number", "money transfer"
+    }
 
     SAFE_CONTEXT_TERMS = {
         "meeting", "schedule", "notes", "project", "thanks", "thank you", "regards",
@@ -126,6 +138,7 @@ class TextClassifier:
             "UPI/Payment Fraud": 58,
             "Extortion Threat": 72,
             "Crypto Investment Pitch": 55,
+            "Romance Scam": 65,
         }
         total_score = max(total_score, category_floor.get(text_category, 0))
 
@@ -173,6 +186,8 @@ class TextClassifier:
             "spam_marketing": False,
             "regional_upi_fraud": False,
             "tech_support_refund": False,
+            "romance_fraud": False,
+            "money_transfer_request": False,
         }
 
         score_breakdown = {
@@ -190,6 +205,8 @@ class TextClassifier:
             "tech_support_refund": 0,
             "ai_generated_tone": 0,
             "spelling_grammar_issues": 0,
+            "romance_fraud": 0,
+            "money_transfer_request": 0,
             "safe_context_adjustment": 0,
         }
 
@@ -260,6 +277,18 @@ class TextClassifier:
             signals["tech_support_refund"] = True
             score_breakdown["tech_support_refund"] = min(22, 10 + tech_hits * 4)
             reasons.append("Contains fake tech-support or refund scam indicators.")
+
+        romance_hits = self._count_matches(text_lower, self.ROMANCE_FRAUD_TERMS)
+        money_transfer_hits = self._count_matches(text_lower, self.MONEY_TRANSFER_TERMS)
+        if romance_hits >= 2:
+            signals["romance_fraud"] = True
+            score_breakdown["romance_fraud"] = min(35, 15 + romance_hits * 7)
+            reasons.append("Contains romance scam or emotional manipulation language.")
+        
+        if money_transfer_hits:
+            signals["money_transfer_request"] = True
+            score_breakdown["money_transfer_request"] = min(32, 16 + money_transfer_hits * 5)
+            reasons.append("Contains explicit requests for money transfer or banking information.")
 
         ai_tone_flag = self._detect_ai_tone(text)
         if ai_tone_flag:
@@ -334,16 +363,31 @@ class TextClassifier:
             issues.append("Excessive punctuation bursts")
         if odd_tokens:
             issues.append("Potential gibberish or obfuscated words")
-        if len(text.split()) <= 4:
+        if len(text.split()) <= 2:
             issues.append("Very short content; limited context")
 
-        quality_penalty = min(70, len(typos) * 4 + len(issues) * 7)
-        score = max(30, 100 - quality_penalty)
+        typo_count = len(typos)
+        word_count = max(1, len(words))
+        issue_penalty = 0
+        for issue in issues:
+            if issue == "Potential gibberish or obfuscated words":
+                issue_penalty += 14
+            elif issue == "Excessive capitalized emphasis":
+                issue_penalty += 8
+            elif issue == "Excessive punctuation bursts":
+                issue_penalty += 6
+            elif issue == "Very short content; limited context":
+                issue_penalty += 4
+
+        raw_penalty = typo_count * 6 + issue_penalty
+        density_factor = min(1.35, 16 / word_count)
+        quality_penalty = min(80, int(raw_penalty * density_factor))
+        final_score = max(20, min(100, 100 - quality_penalty))
 
         return {
             "typos": sorted(set(typos))[:8],
             "grammar_issues": issues,
-            "score": score,
+            "score": final_score,
         }
 
     def _predict_author_style(self, text: str, grammar: Dict[str, List[str] | int]) -> str:
@@ -381,6 +425,8 @@ class TextClassifier:
     def _detect_text_category(self, text_lower: str, signals: Dict[str, bool]) -> str:
         if signals["threat_extortion"]:
             return "Extortion Threat"
+        if signals["romance_fraud"] or (signals["romance_fraud"] and signals["money_transfer_request"]):
+            return "Romance Scam"
         if signals["tech_support_refund"]:
             return "Tech Support Scam"
         if signals["job_scam"]:
@@ -413,6 +459,10 @@ class TextClassifier:
             fraud_types.append("Extortion")
         if signals["tech_support_refund"]:
             fraud_types.append("Tech Support Scam")
+        if signals["romance_fraud"]:
+            fraud_types.append("Romance Scam")
+        if signals["money_transfer_request"]:
+            fraud_types.append("Money Transfer Fraud")
 
         if not fraud_types:
             if risk_level == RiskLevel.LOW:
@@ -434,6 +484,10 @@ class TextClassifier:
             actions.append("Avoid remote-access tools unless you initiated support from a trusted source.")
         if signals["regional_upi_fraud"]:
             actions.append("Reject unexpected UPI collect requests and verify transactions in-app.")
+        if signals["romance_fraud"]:
+            actions.append("Be cautious of false romantic relationships seeking personal/financial information.")
+        if signals["money_transfer_request"]:
+            actions.append("Never send money or share banking details to unknown contacts.")
 
         if not actions:
             if text_category == "Benign Personal/Business Message":

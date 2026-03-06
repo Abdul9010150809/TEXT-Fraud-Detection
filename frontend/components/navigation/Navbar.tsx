@@ -10,7 +10,11 @@ export function Navbar() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Analyze", href: "/analyze" },
+    { name: "Text", href: "/analyze" },
+    { name: "Link", href: "/analyze/link" },
+    { name: "Email", href: "/analyze/email" },
+    { name: "Image", href: "/analyze/image" },
+    { name: "Compare", href: "/analyze/compare" },
     { name: "Results", href: "/results" },
     { name: "Demo", href: "/demo" },
   ];
